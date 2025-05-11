@@ -1,0 +1,26 @@
+services:
+  mysql:
+    image: mysql:8.0.42
+    restart: always
+    command: "mysqld  --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-authentication-plugin=mysql_native_password --optimizer-trace-max-mem-size=102400"
+    environment:
+      - TZ=Asia/Shanghai
+      - LANG=zh_CN.utf8
+      - MYSQL_DATABASE=polaris_server
+      - MYSQL_ROOT_PASSWORD=123456
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/mysqld.cnf:/etc/mysql/conf.d/custom.cnf:cached
+      - ./mysql/initdb:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    expose:
+      - 3306
+    networks:
+      - database
+
+networks:
+  database: {}
+
+volumes:
+  mysql_data: {}

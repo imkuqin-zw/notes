@@ -1,0 +1,59 @@
+services:
+  etcd:
+    image: bitnami/etcd:3.5.11
+    restart: always
+    volumes:
+      - etcd_data:/bitnami/etcd
+    environment:
+      ETCD_ENABLE_V2: "true"
+      ALLOW_NONE_AUTHENTICATION: "yes"
+      ETCD_ADVERTISE_CLIENT_URLS: "http://etcd:2379"
+      ETCD_LISTEN_CLIENT_URLS: "http://0.0.0.0:2379"
+    ports:
+      - "2379:2379/tcp"
+    networks:
+      monitor:
+  
+  prometheus:
+    image: bitnami/prometheus:3.3.1
+    restart: always
+    volumes:
+      - "./prometheus/config/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml"
+      - prometheus_data:/opt/bitnami/prometheus/data
+    ports:
+      - "9090:9090"
+    networks:
+      monitor:
+      apisix:
+      polaris:
+
+  pushgateway:
+    image: bitnami/pushgateway:1.11.1
+    restart: always
+    networks:
+      monitor:
+
+  grafana:
+    image: grafana/grafana:12.0.0
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - "./grafana/provisioning:/etc/grafana/provisioning"
+      - "./grafana/dashboards:/var/lib/grafana/dashboards"
+      - "./grafana/config/grafana.ini:/etc/grafana/grafana.ini"
+    networks:
+      monitor:
+
+networks:
+  monitor: {}
+  apisix:
+    external: true
+    name: apisix_apisix
+  polaris:
+    external: true
+    name: polaris_polaris
+
+volumes:
+  etcd_data: {}
+  prometheus_data: {}
